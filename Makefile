@@ -11,4 +11,4 @@ build:
 
 runtest: build
 	cd ./cmd/testdata && \
-	../../plasma -f main.js
+	../../plasma -d .
