@@ -63,10 +63,11 @@ func main() {
 
 			obj, err := ResolveFileObject(path, runtime)
 			if err != nil {
-				return err
+				log.Printf("error while resolving object in `%s`: %s", path, err)
+				objects[mod] = err
+			} else {
+				objects[mod] = obj
 			}
-
-			objects[mod] = obj
 
 		default:
 			return errors.Errorf("unrecognized file type detected `%s`", path)
