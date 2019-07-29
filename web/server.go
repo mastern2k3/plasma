@@ -33,7 +33,8 @@ func StartServer(dir model.ObjectDirectory) {
 
 		for _, o := range dir {
 			mod.Objects = append(mod.Objects, HomeObjectModel{
-				Path: o.Path,
+				Path:  o.Path,
+				Error: o.Error,
 			})
 		}
 
@@ -48,6 +49,10 @@ func StartServer(dir model.ObjectDirectory) {
 
 		if !has {
 			return c.String(http.StatusNotFound, fmt.Sprintf("Could not find `%s`", path))
+		}
+
+		if _, has := c.QueryParams()["meta"]; has {
+			return c.JSONPretty(http.StatusOK, cached, "  ")
 		}
 
 		return c.String(http.StatusOK, cached.Cached)

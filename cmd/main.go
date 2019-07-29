@@ -126,10 +126,16 @@ func main() {
 			obj, err := ResolveFileObject(path, runtime)
 			if err != nil {
 				log.Printf("error while resolving object in `%s`: %s", path, err)
-				dat = err
-			} else {
-				dat = obj
+
+				objects[mod] = model.DataObject{
+					Path:  mod,
+					Error: err,
+				}
+
+				return nil
 			}
+
+			dat = obj
 
 		case ".babelrc":
 			return nil

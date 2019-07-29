@@ -5,7 +5,8 @@ import (
 )
 
 type HomeObjectModel struct {
-	Path string
+	Path  string
+	Error error
 }
 
 type HomeModel struct {
@@ -19,7 +20,7 @@ Welcome to Plasma
 
   objects:
 
-{{range .Objects}}    <a href="{{.Path}}">{{.Path}}</a>
+{{range .Objects}}    <a href="{{.Path}}">{{.Path}}</a>{{if .Error}} [✘ with error]{{end}}
 {{end}}
 </pre></body></html>
 `))
