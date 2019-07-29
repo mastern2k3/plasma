@@ -3,12 +3,15 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
+)
+
+const (
+	bootstrapScript = `require(moduleName)`
 )
 
 var (
@@ -30,14 +33,11 @@ func main() {
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	var val goja.Value
 
-	if val, err = runtime.RunString(string(b)); err != nil {
+	runtime.Set("moduleName", *file)
+
+	if val, err = runtime.RunScript("bootstrapScript", bootstrapScript); err != nil {
 		log.Fatal(err)
 	}
 

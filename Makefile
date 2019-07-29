@@ -8,3 +8,7 @@ GOGET := $(GO) get
 
 build:
 	$(GOBUILD) -o plasma ./cmd
+
+runtest: build
+	cd ./cmd/testdata && \
+	../../plasma -f main.js
