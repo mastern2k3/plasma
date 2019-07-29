@@ -11,11 +11,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gobuffalo/packr/v2"
-	"github.com/pkg/errors"
-
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
+	"github.com/gobuffalo/packr/v2"
+	"github.com/mastern2k3/plasma/model"
+	"github.com/mastern2k3/plasma/web"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -90,13 +91,6 @@ func (l BoxRegLoader) RegLoader(filename string) ([]byte, error) {
 	return l.box.Find(filename)
 }
 
-type DataObject struct {
-	Path   string
-	Data   interface{}
-	Hash   string
-	Cached string
-}
-
 func main() {
 
 	flag.Parse()
@@ -113,7 +107,7 @@ func main() {
 	registry := require.NewRegistryWithLoader(loader.RegLoader)
 	registry.Enable(runtime)
 
-	objects := map[string]DataObject{}
+	objects := map[string]model.DataObject{}
 
 	err := filepath.Walk(*directory, func(path string, f os.FileInfo, err error) error {
 
@@ -153,7 +147,7 @@ func main() {
 		hashBytes := hash.Sum(make([]byte, hash.Size()))
 		hashString := base64.StdEncoding.EncodeToString(hashBytes)
 
-		objects[mod] = DataObject{
+		objects[mod] = model.DataObject{
 			Path:   mod,
 			Data:   dat,
 			Hash:   hashString,
@@ -167,10 +161,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	jsonStr, err := json.Marshal(objects)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	log.Printf("val: `%s`", jsonStr)
+	web.StartServer(objects)
 }
