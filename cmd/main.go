@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,7 +16,20 @@ import (
 )
 
 const (
-	bootstrapScript = `require(moduleName)`
+	precompileScript = `
+		Babel = require("internal/babel6.min.js");
+		newCode = Babel.transform(userCode, {
+			sourceType: "script",
+			presets: [
+				['es2015', { "modules": false }],
+				'stage-1'
+			]
+		});
+		newCode.code
+	`
+	bootstrapScript = `
+		require(moduleName)
+	`
 )
 
 var (
@@ -38,13 +52,44 @@ func ResolveFileObject(filename string, runtime *goja.Runtime) (map[string]inter
 	return val.Export().(map[string]interface{}), nil
 }
 
+type LocalRegLoader struct {
+	runtime *goja.Runtime
+}
+
+func (l LocalRegLoader) RegLoader(filename string) ([]byte, error) {
+
+	var (
+		val goja.Value
+		err error
+	)
+
+	userCode, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	l.runtime.Set("userCode", string(userCode))
+
+	if val, err = l.runtime.RunScript("precompileScript", precompileScript); err != nil {
+		return nil, err
+	}
+
+	l.runtime.Set("userCode", nil)
+
+	return []byte(val.Export().(string)), nil
+}
+
 func main() {
 
 	flag.Parse()
 
-	runtime := goja.New()
+	precompileRuntime := goja.New()
+	precompileRegistry := new(require.Registry)
+	precompileRegistry.Enable(precompileRuntime)
+	loader := LocalRegLoader{precompileRuntime}
 
-	registry := new(require.Registry)
+	runtime := goja.New()
+	registry := require.NewRegistryWithLoader(loader.RegLoader)
 	registry.Enable(runtime)
 
 	objects := map[string]interface{}{}
@@ -52,6 +97,10 @@ func main() {
 	err := filepath.Walk(*directory, func(path string, f os.FileInfo, err error) error {
 
 		if f.IsDir() {
+			return nil
+		}
+
+		if strings.HasPrefix(path, "internal/") {
 			return nil
 		}
 
@@ -69,6 +118,8 @@ func main() {
 				objects[mod] = obj
 			}
 
+		case ".babelrc":
+			return nil
 		default:
 			return errors.Errorf("unrecognized file type detected `%s`", path)
 		}
