@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobuffalo/packr/v2"
 	"github.com/pkg/errors"
 
 	"github.com/dop251/goja"
@@ -17,7 +18,7 @@ import (
 
 const (
 	precompileScript = `
-		Babel = require("internal/babel6.min.js");
+		Babel = require("babel6.min.js");
 		newCode = Babel.transform(userCode, {
 			sourceType: "script",
 			presets: [
@@ -79,12 +80,23 @@ func (l LocalRegLoader) RegLoader(filename string) ([]byte, error) {
 	return []byte(val.Export().(string)), nil
 }
 
+type BoxRegLoader struct {
+	box *packr.Box
+}
+
+func (l BoxRegLoader) RegLoader(filename string) ([]byte, error) {
+	return l.box.Find(filename)
+}
+
 func main() {
 
 	flag.Parse()
 
+	internalsBox := packr.New("Internals", "./internal")
+
 	precompileRuntime := goja.New()
-	precompileRegistry := new(require.Registry)
+	internalsBoxLoader := BoxRegLoader{internalsBox}
+	precompileRegistry := require.NewRegistryWithLoader(internalsBoxLoader.RegLoader)
 	precompileRegistry.Enable(precompileRuntime)
 	loader := LocalRegLoader{precompileRuntime}
 
@@ -97,10 +109,6 @@ func main() {
 	err := filepath.Walk(*directory, func(path string, f os.FileInfo, err error) error {
 
 		if f.IsDir() {
-			return nil
-		}
-
-		if strings.HasPrefix(path, "internal/") {
 			return nil
 		}
 

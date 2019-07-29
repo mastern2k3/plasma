@@ -12,3 +12,6 @@
 *.out
 
 plasma
+
+cmd/packrd
+*packr*
