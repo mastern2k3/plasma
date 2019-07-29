@@ -12,9 +12,43 @@ github.com/dop251/goja_nodejs/require
 # github.com/go-sourcemap/sourcemap v2.1.2+incompatible
 github.com/go-sourcemap/sourcemap
 github.com/go-sourcemap/sourcemap/internal/base64vlq
+# github.com/gobuffalo/envy v1.7.0
+github.com/gobuffalo/envy
+# github.com/gobuffalo/logger v1.0.1
+github.com/gobuffalo/logger
+# github.com/gobuffalo/packd v0.3.0
+github.com/gobuffalo/packd
+github.com/gobuffalo/packd/internal/takeon/github.com/markbates/errx
+# github.com/gobuffalo/packr/v2 v2.5.2
+github.com/gobuffalo/packr/v2
+github.com/gobuffalo/packr/v2/file/resolver
+github.com/gobuffalo/packr/v2/file
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/oncer
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/safe
+github.com/gobuffalo/packr/v2/jam/parser
+github.com/gobuffalo/packr/v2/plog
+github.com/gobuffalo/packr/v2/file/resolver/encoding/hex
+github.com/gobuffalo/packr/v2/internal/takeon/github.com/markbates/errx
+# github.com/joho/godotenv v1.3.0
+github.com/joho/godotenv
+# github.com/karrick/godirwalk v1.10.12
+github.com/karrick/godirwalk
+# github.com/konsorten/go-windows-terminal-sequences v1.0.2
+github.com/konsorten/go-windows-terminal-sequences
 # github.com/pkg/errors v0.8.1
 github.com/pkg/errors
-# golang.org/x/text v0.3.0
+# github.com/rogpeppe/go-internal v1.3.0
+github.com/rogpeppe/go-internal/modfile
+github.com/rogpeppe/go-internal/module
+github.com/rogpeppe/go-internal/semver
+# github.com/sirupsen/logrus v1.4.2
+github.com/sirupsen/logrus
+# golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
+golang.org/x/crypto/ssh/terminal
+# golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e
+golang.org/x/sys/unix
+golang.org/x/sys/windows
+# golang.org/x/text v0.3.2
 golang.org/x/text/cases
 golang.org/x/text/collate
 golang.org/x/text/language
@@ -22,4 +56,6 @@ golang.org/x/text/unicode/norm
 golang.org/x/text/internal
 golang.org/x/text/transform
 golang.org/x/text/internal/colltab
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
 golang.org/x/text/internal/tag
