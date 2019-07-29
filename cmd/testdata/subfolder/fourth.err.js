@@ -9,5 +9,5 @@ module.exports = {
     im_in_a: {
         sub: "folder"
     },
-    ...moreFields
+    .#.#.moreFields
 }
