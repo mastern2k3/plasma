@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
+	"hash/fnv"
 	"io/ioutil"
 	"log"
 	"os"
@@ -88,6 +90,13 @@ func (l BoxRegLoader) RegLoader(filename string) ([]byte, error) {
 	return l.box.Find(filename)
 }
 
+type DataObject struct {
+	Path   string
+	Data   interface{}
+	Hash   string
+	Cached string
+}
+
 func main() {
 
 	flag.Parse()
@@ -104,7 +113,7 @@ func main() {
 	registry := require.NewRegistryWithLoader(loader.RegLoader)
 	registry.Enable(runtime)
 
-	objects := map[string]interface{}{}
+	objects := map[string]DataObject{}
 
 	err := filepath.Walk(*directory, func(path string, f os.FileInfo, err error) error {
 
@@ -115,21 +124,40 @@ func main() {
 		ext := filepath.Ext(path)
 		mod := strings.TrimSuffix(path, ext)
 
+		var dat interface{}
+
 		switch ext {
 		case ".js":
 
 			obj, err := ResolveFileObject(path, runtime)
 			if err != nil {
 				log.Printf("error while resolving object in `%s`: %s", path, err)
-				objects[mod] = err
+				dat = err
 			} else {
-				objects[mod] = obj
+				dat = obj
 			}
 
 		case ".babelrc":
 			return nil
 		default:
 			return errors.Errorf("unrecognized file type detected `%s`", path)
+		}
+
+		jsonStr, err := json.Marshal(dat)
+		if err != nil {
+			return err
+		}
+
+		hash := fnv.New128a()
+		hash.Write([]byte(jsonStr))
+		hashBytes := hash.Sum(make([]byte, hash.Size()))
+		hashString := base64.StdEncoding.EncodeToString(hashBytes)
+
+		objects[mod] = DataObject{
+			Path:   mod,
+			Data:   dat,
+			Hash:   hashString,
+			Cached: string(jsonStr),
 		}
 
 		return nil
