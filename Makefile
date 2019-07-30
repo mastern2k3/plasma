@@ -7,7 +7,8 @@ GOTEST := $(GO) test
 GOGET := $(GO) get
 
 build:
-	cd cmd && packr2
+	cd cmd && \
+	packr2
 	$(GOBUILD) -o plasma ./cmd
 
 runtest: build

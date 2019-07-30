@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	_ "github.com/pkg/errors"
+
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
 	"github.com/gobuffalo/packr/v2"
