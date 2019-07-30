@@ -13,7 +13,8 @@ type HomeModel struct {
 	Objects []HomeObjectModel
 }
 
-var HomeTemplate = template.Must(template.New("home").Parse(`
+var HomeTemplate = template.Must(
+	template.New("home").Parse(`
 <html><body><pre>
 Welcome to Plasma
 =================

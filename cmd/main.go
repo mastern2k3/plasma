@@ -14,9 +14,10 @@ import (
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
 	"github.com/gobuffalo/packr/v2"
+
 	"github.com/mastern2k3/plasma/model"
+	u "github.com/mastern2k3/plasma/util"
 	"github.com/mastern2k3/plasma/web"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -31,6 +32,7 @@ const (
 		});
 		newCode.code
 	`
+
 	bootstrapScript = `
 		require(moduleName)
 	`
@@ -125,7 +127,8 @@ func main() {
 
 			obj, err := ResolveFileObject(path, runtime)
 			if err != nil {
-				log.Printf("error while resolving object in `%s`: %s", path, err)
+
+				u.Logger.WithError(err).Errorf("error while resolving object in `%s`", path)
 
 				objects[mod] = model.DataObject{
 					Path:  mod,
@@ -137,10 +140,9 @@ func main() {
 
 			dat = obj
 
-		case ".babelrc":
-			return nil
 		default:
-			return errors.Errorf("unrecognized file type detected `%s`", path)
+			u.Logger.Warningf("unrecognized file type detected `%s`", path)
+			return nil
 		}
 
 		jsonStr, err := json.Marshal(dat)
