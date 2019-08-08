@@ -1,3 +1,7 @@
+# github.com/bep/debounce v1.2.0
+github.com/bep/debounce
+# github.com/dgrijalva/jwt-go v3.2.0+incompatible
+github.com/dgrijalva/jwt-go
 # github.com/dlclark/regexp2 v1.1.8
 github.com/dlclark/regexp2
 github.com/dlclark/regexp2/syntax
@@ -9,6 +13,8 @@ github.com/dop251/goja/parser
 github.com/dop251/goja/token
 # github.com/dop251/goja_nodejs v0.0.0-20171011081505-adff31b136e6
 github.com/dop251/goja_nodejs/require
+# github.com/fsnotify/fsnotify v1.4.7
+github.com/fsnotify/fsnotify
 # github.com/go-sourcemap/sourcemap v2.1.2+incompatible
 github.com/go-sourcemap/sourcemap
 github.com/go-sourcemap/sourcemap/internal/base64vlq
@@ -35,11 +41,14 @@ github.com/joho/godotenv
 github.com/karrick/godirwalk
 # github.com/konsorten/go-windows-terminal-sequences v1.0.2
 github.com/konsorten/go-windows-terminal-sequences
-# github.com/labstack/echo/v4 v4.1.6
+# github.com/labstack/echo/v4 v4.1.8
 github.com/labstack/echo/v4
+github.com/labstack/echo/v4/middleware
 # github.com/labstack/gommon v0.2.9
 github.com/labstack/gommon/color
 github.com/labstack/gommon/log
+github.com/labstack/gommon/bytes
+github.com/labstack/gommon/random
 # github.com/mattn/go-colorable v0.1.2
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.8

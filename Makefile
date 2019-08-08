@@ -6,9 +6,11 @@ GOCLEAN := $(GO) clean
 GOTEST := $(GO) test
 GOGET := $(GO) get
 
-build:
+bundle:
 	cd cmd && \
 	packr2
+
+build: bundle
 	$(GOBUILD) -o plasma ./cmd
 
 runtest: build

@@ -7,6 +7,7 @@ import (
 	"text/template"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/mastern2k3/plasma/model"
 )
@@ -22,6 +23,9 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 func StartServer(dir model.ObjectDirectory) {
 
 	e := echo.New()
+
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
 	e.Renderer = &Template{
 		templates: HomeTemplate,
@@ -48,7 +52,11 @@ func StartServer(dir model.ObjectDirectory) {
 		cached, has := dir[path]
 
 		if !has {
-			return c.String(http.StatusNotFound, fmt.Sprintf("Could not find `%s`", path))
+			return c.String(http.StatusNotFound, fmt.Sprintf("could not find `%s`", path))
+		}
+
+		if cached.Error != nil {
+			return c.String(http.StatusFailedDependency, fmt.Sprintf("error resolving `%s`", path))
 		}
 
 		if _, has := c.QueryParams()["meta"]; has {

@@ -1,12 +1,12 @@
 package main
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"hash/fnv"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,6 +17,7 @@ import (
 	"github.com/dop251/goja_nodejs/require"
 	"github.com/gobuffalo/packr/v2"
 
+	"github.com/mastern2k3/plasma"
 	"github.com/mastern2k3/plasma/model"
 	u "github.com/mastern2k3/plasma/util"
 	"github.com/mastern2k3/plasma/web"
@@ -119,57 +120,78 @@ func main() {
 			return nil
 		}
 
-		ext := filepath.Ext(path)
-		mod := strings.TrimSuffix(path, ext)
-
-		var dat interface{}
-
-		switch ext {
-		case ".js":
-
-			obj, err := ResolveFileObject(path, runtime)
-			if err != nil {
-
-				u.Logger.WithError(err).Errorf("error while resolving object in `%s`", path)
-
-				objects[mod] = model.DataObject{
-					Path:  mod,
-					Error: err,
-				}
-
-				return nil
-			}
-
-			dat = obj
-
-		default:
-			u.Logger.Warningf("unrecognized file type detected `%s`", path)
-			return nil
-		}
-
-		jsonStr, err := json.Marshal(dat)
-		if err != nil {
-			return err
-		}
-
-		hash := fnv.New128a()
-		hash.Write([]byte(jsonStr))
-		hashBytes := hash.Sum(make([]byte, hash.Size()))
-		hashString := base64.StdEncoding.EncodeToString(hashBytes)
-
-		objects[mod] = model.DataObject{
-			Path:   mod,
-			Data:   dat,
-			Hash:   hashString,
-			Cached: string(jsonStr),
-		}
-
-		return nil
+		return DigestFile(path, objects, runtime)
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		u.Logger.Fatal(err)
 	}
 
+	changedFiles := make(chan string)
+
+	go func() {
+		if err := plasma.StartWatching(context.Background(), *directory, changedFiles); err != nil {
+			u.Logger.WithError(err).Fatal("error while watching")
+		}
+	}()
+
+	go func() {
+		for path := range changedFiles {
+			if err := DigestFile(filepath.Clean(path), objects, runtime); err != nil {
+				u.Logger.WithError(err).Fatal("error while digesting file changes")
+			}
+		}
+	}()
+
 	web.StartServer(objects)
+}
+
+func DigestFile(path string, objects model.ObjectDirectory, runtime *goja.Runtime) error {
+
+	ext := filepath.Ext(path)
+	mod := strings.TrimSuffix(path, ext)
+
+	var dat interface{}
+
+	switch ext {
+	case ".js":
+
+		obj, err := ResolveFileObject(path, runtime)
+		if err != nil {
+
+			u.Logger.WithError(err).Errorf("error while resolving object in `%s`", path)
+
+			objects[mod] = model.DataObject{
+				Path:  mod,
+				Error: err,
+			}
+
+			return nil
+		}
+
+		dat = obj
+
+	default:
+		u.Logger.Warningf("unrecognized file type detected `%s`", path)
+		return nil
+	}
+
+	jsonBytes, err := json.Marshal(dat)
+	if err != nil {
+		return err
+	}
+
+	hash := fnv.New128a()
+	hash.Write(jsonBytes)
+	hashBytes := hash.Sum(make([]byte, hash.Size()))
+	hashString := base64.StdEncoding.EncodeToString(hashBytes)
+
+	objects[mod] = model.DataObject{
+		Path:   mod,
+		Data:   dat,
+		Hash:   hashString,
+		Cached: string(jsonBytes),
+	}
+
+	return nil
 }

@@ -1,6 +1,6 @@
 
 module.exports = {
     coolStoryBro: {
-        fuck: "off"
+        fuck: "offf"
     }
 }
