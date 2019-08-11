@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"hash/fnv"
@@ -69,7 +68,9 @@ func main() {
 
 	runtime := goja.New()
 
-	loader := PrecompilingLoader{javascript.NewPrecompiler()}
+	precompiler := javascript.NewPrecompiler()
+
+	loader := PrecompilingLoader{precompiler}
 	registry := require.NewRegistryWithLoader(loader.RegLoader)
 	registry.Enable(runtime)
 
@@ -101,7 +102,7 @@ func main() {
 
 			runtime := goja.New()
 
-			loader := PrecompilingLoader{javascript.NewPrecompiler()}
+			loader := PrecompilingLoader{precompiler}
 			registry := require.NewRegistryWithLoader(loader.RegLoader)
 			registry.Enable(runtime)
 
@@ -152,13 +153,12 @@ func DigestFile(path string, objects model.ObjectDirectory, runtime *goja.Runtim
 	hash := fnv.New128a()
 	hash.Write(jsonBytes)
 	hashBytes := hash.Sum(make([]byte, hash.Size()))
-	hashString := base64.StdEncoding.EncodeToString(hashBytes)
 
 	objects[mod] = model.DataObject{
 		Path:   mod,
 		Data:   dat,
-		Hash:   hashString,
-		Cached: string(jsonBytes),
+		Hash:   hashBytes,
+		Cached: jsonBytes,
 	}
 
 	return nil
