@@ -15,27 +15,15 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
-	"github.com/gobuffalo/packr/v2"
 
 	"github.com/mastern2k3/plasma"
+	"github.com/mastern2k3/plasma/javascript"
 	"github.com/mastern2k3/plasma/model"
 	u "github.com/mastern2k3/plasma/util"
 	"github.com/mastern2k3/plasma/web"
 )
 
 const (
-	precompileScript = `
-		Babel = require("babel6.min.js");
-		newCode = Babel.transform(userCode, {
-			sourceType: "script",
-			presets: [
-				['es2015', { "modules": false }],
-				'stage-1'
-			]
-		});
-		newCode.code
-	`
-
 	bootstrapScript = `
 		require(moduleName)
 	`
@@ -61,54 +49,27 @@ func ResolveFileObject(filename string, runtime *goja.Runtime) (map[string]inter
 	return val.Export().(map[string]interface{}), nil
 }
 
-type LocalRegLoader struct {
-	runtime *goja.Runtime
+type PrecompilingLoader struct {
+	precompiler *javascript.Precompiler
 }
 
-func (l LocalRegLoader) RegLoader(filename string) ([]byte, error) {
-
-	var (
-		val goja.Value
-		err error
-	)
+func (l PrecompilingLoader) RegLoader(filename string) ([]byte, error) {
 
 	userCode, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	l.runtime.Set("userCode", string(userCode))
-
-	if val, err = l.runtime.RunScript("precompileScript", precompileScript); err != nil {
-		return nil, err
-	}
-
-	l.runtime.Set("userCode", nil)
-
-	return []byte(val.Export().(string)), nil
-}
-
-type BoxRegLoader struct {
-	box *packr.Box
-}
-
-func (l BoxRegLoader) RegLoader(filename string) ([]byte, error) {
-	return l.box.Find(filename)
+	return l.precompiler.Precompile(userCode)
 }
 
 func main() {
 
 	flag.Parse()
 
-	internalsBox := packr.New("Internals", "./internal")
-
-	precompileRuntime := goja.New()
-	internalsBoxLoader := BoxRegLoader{internalsBox}
-	precompileRegistry := require.NewRegistryWithLoader(internalsBoxLoader.RegLoader)
-	precompileRegistry.Enable(precompileRuntime)
-	loader := LocalRegLoader{precompileRuntime}
-
 	runtime := goja.New()
+
+	loader := PrecompilingLoader{javascript.NewPrecompiler()}
 	registry := require.NewRegistryWithLoader(loader.RegLoader)
 	registry.Enable(runtime)
 
@@ -137,6 +98,13 @@ func main() {
 
 	go func() {
 		for path := range changedFiles {
+
+			runtime := goja.New()
+
+			loader := PrecompilingLoader{javascript.NewPrecompiler()}
+			registry := require.NewRegistryWithLoader(loader.RegLoader)
+			registry.Enable(runtime)
+
 			if err := DigestFile(filepath.Clean(path), objects, runtime); err != nil {
 				u.Logger.WithError(err).Fatal("error while digesting file changes")
 			}

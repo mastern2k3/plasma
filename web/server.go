@@ -63,7 +63,7 @@ func StartServer(dir model.ObjectDirectory) {
 			return c.JSONPretty(http.StatusOK, cached, "  ")
 		}
 
-		return c.String(http.StatusOK, cached.Cached)
+		return c.JSONBlob(http.StatusOK, []byte(cached.Cached))
 	})
 
 	e.Logger.Fatal(e.Start(":1323"))

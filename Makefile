@@ -7,7 +7,7 @@ GOTEST := $(GO) test
 GOGET := $(GO) get
 
 bundle:
-	cd cmd && \
+	cd javascript && \
 	packr2
 
 build: bundle
