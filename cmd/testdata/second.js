@@ -1,6 +1,6 @@
 
 module.exports = {
-    coolStoryBro: {
-        fuck: "offf"
+    exampleSecond: {
+        plasmaIs: "awesome"
     }
 }

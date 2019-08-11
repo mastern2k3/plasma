@@ -1,7 +1,8 @@
-var sec = require("./second.js");
+var sec = require("second.js");
 
 module.exports = {
-    something: sec.coolStoryBro.fuck,
-    could: "beeeee",
-    happening: 1231234,
+    fromRequire: sec.exampleSecond.plasmaIs,
+    ...sec.exampleSecond,
+    someString: "weeheww",
+    someInt: 1231234,
 }

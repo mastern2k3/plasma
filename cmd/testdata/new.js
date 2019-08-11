@@ -1,4 +1,5 @@
 
 module.exports = {
-    ptzatzadddasdasd: "    "
+    ptzatzadddasdasd: "  :D  ",
+    ...require("main.js"),
 }
