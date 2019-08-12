@@ -29,7 +29,8 @@ const (
 )
 
 var (
-	directory = flag.String("d", "", "directory to scan")
+	directory       = flag.String("d", "", "directory to scan")
+	debugPrecompile = flag.String("dp", "", "debug precompile")
 )
 
 func ResolveFileObject(filename string, runtime *goja.Runtime) (map[string]interface{}, error) {
@@ -54,6 +55,10 @@ type PrecompilingLoader struct {
 
 func (l PrecompilingLoader) RegLoader(filename string) ([]byte, error) {
 
+	if filepath.Ext(filename) != ".js" {
+		filename = filename + ".js"
+	}
+
 	userCode, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -65,6 +70,25 @@ func (l PrecompilingLoader) RegLoader(filename string) ([]byte, error) {
 func main() {
 
 	flag.Parse()
+
+	if *debugPrecompile != "" {
+
+		precompiler := javascript.NewPrecompiler()
+
+		userCode, err := ioutil.ReadFile(*debugPrecompile)
+		if err != nil {
+			panic(err)
+		}
+
+		newJs, err := precompiler.Precompile(userCode)
+		if err != nil {
+			panic(err)
+		}
+
+		u.Logger.Info(string(newJs))
+
+		return
+	}
 
 	runtime := goja.New()
 
@@ -131,8 +155,9 @@ func DigestFile(path string, objects model.ObjectDirectory, runtime *goja.Runtim
 			u.Logger.WithError(err).Errorf("error while resolving object in `%s`", path)
 
 			objects[mod] = model.DataObject{
-				Path:  mod,
-				Error: err,
+				Path:         mod,
+				Error:        err,
+				ErrorMessage: err.Error(),
 			}
 
 			return nil

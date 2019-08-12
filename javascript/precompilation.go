@@ -1,6 +1,8 @@
 package javascript
 
 import (
+	"strings"
+
 	"github.com/dop251/goja"
 	"github.com/dop251/goja_nodejs/require"
 	"github.com/gobuffalo/packr/v2"
@@ -10,11 +12,11 @@ const (
 	precompileScript = `
 		Babel = require("babel6.min.js");
 		newCode = Babel.transform(userCode, {
-			sourceType: "script",
+			sourceType: "module",
 			presets: [
-				['es2015', { "modules": false }],
+				['es2015'],
 				'stage-1'
-			]
+			],
 		});
 		newCode.code
 	`
@@ -58,5 +60,9 @@ func (p *Precompiler) Precompile(input []byte) ([]byte, error) {
 
 	p.runtime.Set("userCode", nil)
 
-	return []byte(val.Export().(string)), nil
+	newJs := val.Export().(string)
+
+	newJs = strings.Replace(newJs, "\"use strict\";", "", 1)
+
+	return []byte(newJs), nil
 }

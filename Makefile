@@ -16,3 +16,7 @@ build: bundle
 runtest: build
 	cd ./cmd/testdata && \
 	../../plasma -d .
+
+runtest2: build
+	cd ./cmd/testdata && \
+	../../plasma -d . -dp ./features/import.js

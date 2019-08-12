@@ -55,16 +55,16 @@ func StartServer(dir model.ObjectDirectory) {
 			return c.String(http.StatusNotFound, fmt.Sprintf("could not find `%s`", path))
 		}
 
-		if cached.Error != nil {
-			return c.String(http.StatusFailedDependency, fmt.Sprintf("error resolving `%s`", path))
-		}
-
 		if _, has := c.QueryParams()["meta"]; has {
 			return c.JSONPretty(http.StatusOK, cached, "  ")
 		}
 
-		return c.JSONBlob(http.StatusOK, []byte(cached.Cached))
+		if cached.Error != nil {
+			return c.String(http.StatusFailedDependency, fmt.Sprintf("error resolving `%s`", path))
+		}
+
+		return c.JSONBlob(http.StatusOK, cached.Cached)
 	})
 
-	e.Logger.Fatal(e.Start(":1323"))
+	e.Logger.Fatal(e.Start(":5516"))
 }
