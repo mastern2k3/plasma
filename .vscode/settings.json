@@ -58,5 +58,8 @@
         "while",
         "with",
         "write"
+    ],
+    "cSpell.words": [
+        "debounced"
     ]
 }

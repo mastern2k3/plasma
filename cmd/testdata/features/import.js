@@ -1,5 +1,5 @@
-import M from "main"
+import Main from "main"
 
 module.exports = {
-    theM: M,
+    importedMain: Main,
 }

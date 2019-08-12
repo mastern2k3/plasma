@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
@@ -178,6 +179,16 @@ func DigestFile(path string, objects model.ObjectDirectory, runtime *goja.Runtim
 	hash := fnv.New128a()
 	hash.Write(jsonBytes)
 	hashBytes := hash.Sum(make([]byte, hash.Size()))
+
+	if oldObj, has := objects[mod]; has {
+
+		if bytes.Equal(hashBytes, oldObj.Hash) {
+			u.Logger.Infof("digested object equal to old record, ignoring")
+			return nil
+		} else {
+			u.Logger.Infof("digested object different from old record, updating")
+		}
+	}
 
 	objects[mod] = model.DataObject{
 		Path:   mod,

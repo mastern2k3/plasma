@@ -14,20 +14,7 @@ import (
 	u "github.com/mastern2k3/plasma/util"
 )
 
-// type InfiniChan struct {
-// 	Chan     chan interface{}
-// 	backlock []interface{}
-// 	lock     sync.RWMutex
-// }
-
-// func NewInfiniChan() *InfiniChan {
-// 	return &InfiniChan{
-// 		Chan: make(chan interface{}),
-// 	}
-// }
-
 func isDir(path string) (bool, error) {
-
 	if stat, err := os.Stat(path); err != nil {
 		if os.IsNotExist(err) {
 			// file does not exist, gracefully ignore
@@ -49,6 +36,24 @@ func StartWatching(ctx context.Context, path string, output chan string) error {
 	}
 
 	debounced := debounce.New(time.Second)
+
+	if err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			if err = watcher.Add(path); err != nil {
+				return err
+			}
+		}
+
+		return nil
+
+	}); err != nil {
+		return err
+	}
 
 	if err = watcher.Add(path); err != nil {
 		return err
